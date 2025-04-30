@@ -1,0 +1,78 @@
+lateinit var myDBHelper: MyDBHelperLab2
+myDBHelper = MyDBHelperLab2(this)
+        val saveButton = findViewById<Button>(R.id.save)
+        val tsql = findViewById<EditText>(R.id.tsql)
+        val displayButton = findViewById<Button>(R.id.displayBut)
+        val displayText = findViewById<TextView>(R.id.displayText)
+
+        saveButton.setOnClickListener {
+            val text = tsql.text.toString()
+            myDBHelper.insert(text)
+            Toast.makeText(this, "Saved to SQL", Toast.LENGTH_SHORT).show()
+        }
+
+        displayButton.setOnClickListener {
+            val data = myDBHelper.getAllData()
+            displayText.text = data
+        }
+
+
+package com.example.practice
+
+import android.content.ContentValues
+import android.content.Context
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteOpenHelper
+
+class MyDBHelperLab2(context: Context) : SQLiteOpenHelper(context, "Lab2DB", null, 1) {
+
+    override fun onCreate(db: SQLiteDatabase?) {
+        db?.execSQL("CREATE TABLE TextTable(id INTEGER PRIMARY KEY AUTOINCREMENT, textData TEXT)")
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+        db?.execSQL("DROP TABLE IF EXISTS TextTable")
+        onCreate(db)
+    }
+
+    fun insert(text: String) {
+        val db = writableDatabase
+        val cv = ContentValues()
+        cv.put("textData", text)
+        db.insert("TextTable", null, cv)
+        db.close()
+    }
+
+    fun getAllData(): String {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM TextTable", null)
+        val data = StringBuilder()
+
+        while (cursor.moveToNext()) {
+            val id = cursor.getInt(0)
+            val text = cursor.getString(1)
+            data.append("ID: $id, Text: $text\n")
+        }
+        cursor.close()
+        db.close()
+        return data.toString()
+    }
+
+
+}
+
+
+
+val fire=findViewById<EditText>(R.id.fire)
+        val firebut=findViewById<Button>(R.id.firesave)
+        firebut.setOnClickListener{
+            val db=FirebaseDatabase.getInstance()
+            val ref=db.getReference("devidb")
+            val userid=ref.push().key?: return@setOnClickListener
+            val usermap= mapOf("name" to fire.text.toString())
+            ref.child(userid).setValue(usermap)
+                .addOnSuccessListener { Toast.makeText(this,"saved",Toast.LENGTH_SHORT).show() }
+                .addOnFailureListener{ Toast.makeText(this,"no saved",Toast.LENGTH_SHORT).show() }
+        }
+
+

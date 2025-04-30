@@ -1,0 +1,227 @@
+package com.example.practice
+
+import android.app.DatePickerDialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
+
+class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+
+//Intent
+        val intbut = findViewById<Button>(R.id.buttonint)
+        intbut.setOnClickListener {
+            val i = Intent(this, P1::class.java)
+            startActivity(i)
+        }
+
+//notifications
+        val nb=findViewById<Button>(R.id.buttonnot)
+        val cid="myid"
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+            val channel=NotificationChannel(cid,"hello all",NotificationManager.IMPORTANCE_DEFAULT)
+            val manager=getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
+        nb.setOnClickListener{
+            val i=Intent(this,MainActivity::class.java)
+            val pi=PendingIntent.getActivity(this,0,i,PendingIntent.FLAG_IMMUTABLE)
+            val builder=NotificationCompat.Builder(this,cid)
+                .setContentTitle("summa")
+                .setContentText("summa dhn pa")
+                .setContentIntent(pi)
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+            with(NotificationManagerCompat.from(this)){
+                notify(1,builder.build())
+            }
+        }
+    }
+
+
+//popup menu
+        val popbut = findViewById<Button>(R.id.buttonpop)
+        popbut.setOnClickListener {
+            val popmenu = PopupMenu(this, popbut)
+            popmenu.menuInflater.inflate(R.menu.popup, popmenu.menu)
+            popmenu.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.opt1 -> {
+                        Toast.makeText(this, "Hello all", Toast.LENGTH_LONG).show()
+                        true
+                    }
+
+                    R.id.opt2 -> {
+                        val i = Intent(this, P1::class.java)
+                        startActivity(i)
+                        true
+                    }
+
+                    else -> {
+                        true
+                    }
+                }
+            }
+            popmenu.show()
+        }
+
+//contextmenu register
+        val contextmenu = findViewById<Button>(R.id.buttoncont)
+        registerForContextMenu(contextmenu)
+
+
+//ProgressBar
+        val pbar = findViewById<ProgressBar>(R.id.pb)
+//alert
+        val alert = findViewById<Button>(R.id.buttonal)
+        alert.setOnClickListener {
+            val b = AlertDialog.Builder(this)
+            b.setTitle("exit")
+            b.setMessage("do yo wanna goo")
+            b.setPositiveButton("yes") { dialog, which ->
+                Toast.makeText(this, "boiii", Toast.LENGTH_LONG).show()
+                //progressbar
+                pbar.visibility = View.VISIBLE
+                Handler(Looper.getMainLooper()).postDelayed({
+                    pbar.visibility = View.GONE
+                    Toast.makeText(this, "progress done", Toast.LENGTH_LONG).show()
+                }, 5000)
+            }
+
+            b.setNegativeButton("No") { dialog, which ->
+                dialog.dismiss()
+            }
+            val dialog = b.create()
+            dialog.show()
+        }
+
+
+
+//progress bar
+        val pbutton=findViewById<Button>(R.id.buttonpb)
+        pbutton.setOnClickListener{
+            var p=0
+            val handler=Handler(Looper.getMainLooper())
+            handler.post(object:Runnable{
+                override fun run(){
+                    if(p<0){
+                        pbar.progress=p
+                        p+=10
+                        handler.postDelayed(this,2000)
+                    }
+                }
+            })
+        }
+
+
+//date picker
+        val date = findViewById<Button>(R.id.buttond)
+        date.setOnClickListener {
+            val c = Calendar.getInstance()
+            val y = c.get(Calendar.YEAR)
+            val m = c.get(Calendar.MONTH)
+            val d = c.get(Calendar.DAY_OF_MONTH)
+            val dp = DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDate ->
+                val date = "$selectedYear/${selectedMonth+1}/$selectedDate"
+                Toast.makeText(this, "date: $date", Toast.LENGTH_LONG).show()
+            }, y, m, d)
+            dp.show()
+        }
+
+        
+//Timepicker
+        val time = findViewById<Button>(R.id.buttont)
+        time.setOnClickListener {
+            val c = Calendar.getInstance()
+            val h = c.get(Calendar.HOUR_OF_DAY)
+            val m = c.get(Calendar.MINUTE)
+            val tp = TimePickerDialog(this, { _, selectedhour, selectedminute ->
+                val tim = String.format("%02d:%02d", selectedhour, selectedminute)
+                Toast.makeText(this, "time:$tim", Toast.LENGTH_LONG).show()
+            }, h, m, true)
+            tp.show()
+        }
+
+//SharedPreference
+        val t1=findViewById<TextView>(R.id.textView)
+        val t2=findViewById<TextView>(R.id.showt)
+        val save=findViewById<Button>(R.id.buttonsave)
+        val show=findViewById<Button>(R.id.buttonshow)
+        val sp=getSharedPreferences("Mypref", MODE_PRIVATE)
+        save.setOnClickListener{
+            val data=t1.text.toString();
+            val edit=sp.edit()
+            edit.putString("text",data)
+            edit.apply()
+            Toast.makeText(this,"saved",Toast.LENGTH_LONG).show()
+        }
+        show.setOnClickListener{
+            val data=sp.getString("text","")
+            val edit=sp.edit()
+            edit.clear()
+            edit.apply()
+            t2.setText(data)
+        }
+
+
+
+//options menu
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.options,menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.op1->{
+                Toast.makeText(this,"Hello all",Toast.LENGTH_LONG).show()
+                return true
+            }
+            R.id.op2->{
+                val i=Intent(this,lab2::class.java)
+                startActivity(i)
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+
+
+//context menu
+    override fun onCreateContextMenu(
+        menu: ContextMenu?,
+        v: View?,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+    menuInflater.inflate(R.menu.context,menu)
+
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.o1->{
+                Toast.makeText(this,"Hello all",Toast.LENGTH_LONG).show()
+                return true
+            }
+            R.id.o2->{
+                val i=Intent(this,P1::class.java)
+                startActivity(i)
+                return true
+            }
+        }
+        return super.onContextItemSelected(item)
+    }
+}

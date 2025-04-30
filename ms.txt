@@ -75,4 +75,13 @@ val fire=findViewById<EditText>(R.id.fire)
                 .addOnFailureListener{ Toast.makeText(this,"no saved",Toast.LENGTH_SHORT).show() }
         }
 
+//Firebase
+private fun saveToFirebase(address: String) {
+        val database = FirebaseDatabase.getInstance()
+        val ref = database.getReference("users_location")
+        val id = ref.push().key
+        if (id != null) {
+            ref.child(id).setValue(address)
+        }
+    }
 

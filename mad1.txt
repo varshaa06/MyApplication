@@ -71,7 +71,27 @@ class lab2 : AppCompatActivity() {
                 Toast.makeText(this, "WiFi ON", Toast.LENGTH_SHORT).show()
             }
         }
-
+        //Bluetooth
+        private fun turnOnBluetooth() {
+        val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
+        if (bluetoothAdapter == null) {
+            Toast.makeText(this, "Bluetooth not supported", Toast.LENGTH_SHORT).show()
+        } else {
+            if (!bluetoothAdapter.isEnabled) {
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                if (ActivityCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.BLUETOOTH_CONNECT
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return
+                }
+                startActivity(enableBtIntent)
+            } else {
+                Toast.makeText(this, "Bluetooth already ON", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
         // SMS intent
         val smsBut = findViewById<Button>(R.id.smsBut)
         smsBut.setOnClickListener {
